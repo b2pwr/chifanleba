@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+  <head>
+    <title>誰在礁岩館</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <div class="title">誰在礁岩館</div>
+    <div class="hint"></div>
+    <ul id="messages"></ul>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script> 
+    <script>
+      var socket = io();
+      var name = prompt("請輸入暱稱","guest");
+      //called "Instruction and Research Center" or "Teaching and Researching Hall"
+      var IRCenter = ["25.013095", "121.538599"];
+      var d = 0;
+
+      if(name=="" || name=="null"){
+        name = "guest";
+      }
+
+      socket.on('init',function(group){
+        console.log("init");
+        $('#messages').empty();
+        for(i in group) {
+          $('#messages').append($('<li>').text(group[i]));
+        }
+      });
+
+      if (!navigator.geolocation){
+        $(".hint").append("<p>Geolocation is not supported by your browser</p>");
+      }
+      
+      navigator.geolocation.getCurrentPosition(function(position) {
+        d = distance(position.coords.longitude.toFixed(6), position.coords.latitude.toFixed(6), IRCenter[1], IRCenter[0]);
+        if(d>1){
+          console.log(d+":out");
+          $('.hint').empty();
+          $(".hint").append("<p>礁岩館範圍外</p>");
+          socket.on('login',function(group){
+            $('#messages').empty();
+            for(i in group) {
+              $('#messages').append($('<li>').text(group[i]));
+            }
+          });
+        }
+        else {
+          console.log(d+":in");
+          $('.hint').empty();
+          $(".hint").append("<p>你在礁岩館</p>");
+          socket.emit("login", name);
+          socket.on('login',function(group){
+            $('#messages').empty();
+            for(i in group) {
+              $('#messages').append($('<li>').text(group[i]));
+            }
+          });
+        }
+      });
+
+      socket.on('disconnect',function(group){
+        $('#messages').empty();
+        for(i in group) {
+          $('#messages').append($('<li>').text(group[i]));
+        }
+      });
+
+      var distance =function (lon1, lat1, lon2, lat2) {
+        var R = 6371; // Radius of the earth in km
+        var dLat = (lat2-lat1) * Math.PI / 180;  // Javascript functions in radians
+        var dLon = (lon2-lon1) * Math.PI / 180; 
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2); 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        var d = R * c; // Distance in km
+        return d;
+      }
+    </script>
+  </body>
+</html>

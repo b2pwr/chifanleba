@@ -1,0 +1,16 @@
+{
+  "name": "chifanleba",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.10.2",
+    "socket.io": "^1.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test"
+  },
+  "author": "b2",
+  "license": "ISC"
+}
